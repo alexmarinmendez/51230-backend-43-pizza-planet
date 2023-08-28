@@ -9,9 +9,20 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PizzasModule } from './pizzas/pizzas.module';
 import FirstMiddleware from './middlewares/first.middleware';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://localhost:27017'), PizzasModule],
+  imports: [
+    ConfigModule.forRoot(),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config: ConfigService) => ({
+        uri: config.get<string>('MONGO_URL'),
+      }),
+    }),
+    PizzasModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
